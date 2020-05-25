@@ -7,7 +7,7 @@
 # pytorch       latest (pip)
 # ==================================================================
 
-FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
+FROM nvidia/cuda:10.0-cudnn7-devel-ubuntu16.04
 RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
     PIP_INSTALL="python -m pip --no-cache-dir install --upgrade" && \
     GIT_CLONE="git clone --depth 10" && \
@@ -63,34 +63,40 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
 #    $PIP_INSTALL \
 #        torchvision_nightly \
 #        && \
-    wget -O torch-1.1.0-cp36-cp36m-linux_x86_64.whl \
-        https://download.pytorch.org/whl/cu90/torch-1.1.0-cp36-cp36m-linux_x86_64.whl &&\
-    wget -O torchvision-0.3.0-cp36-cp36m-manylinux1_x86_64.whl \
-        https://download.pytorch.org/whl/cu90/torchvision-0.3.0-cp36-cp36m-manylinux1_x86_64.whl &&\
+    wget -O torch-1.4.0-cp36-cp36m-linux_x86_64.whl \
+        https://download.pytorch.org/whl/cu100/torch-1.4.0%2Bcu100-cp36-cp36m-linux_x86_64.whl &&\
+#        https://download.pytorch.org/whl/cu90/torch-1.1.0-cp36-cp36m-linux_x86_64.whl &&\
+    wget -O torchvision-0.5.0-cp36-cp36m-manylinux1_x86_64.whl \
+#        https://download.pytorch.org/whl/cu90/torchvision-0.3.0-cp36-cp36m-manylinux1_x86_64.whl &&\
+        https://download.pytorch.org/whl/cu100/torchvision-0.5.0%2Bcu100-cp36-cp36m-linux_x86_64.whl &&\
     $PIP_INSTALL \
         torch-1.1.0-cp36-cp36m-linux_x86_64.whl\
         torchvision-0.3.0-cp36-cp36m-manylinux1_x86_64.whl\
         && \
     
     apt-get remove -y --purge --auto-remove cmake &&\
-    apt-get update -y &&\
-    $APT_INSTALL libssl-dev &&\
-    wget https://github.com/Kitware/CMake/releases/download/v3.17.2/cmake-3.17.2.tar.gz  &&\
-    tar -xzvf cmake-3.17.2.tar.gz &&\
-    cd cmake-3.17.2 &&\
-    ./bootstrap &&\
-    make &&\
-    make install &&\
+    wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add - &&\
+    apt-add-repository 'deb https://apt.kitware.com/ubuntu/ xenial main' &&\
+    apt-get update &&\
+    $APT_INSTALL cmake &&\
+    #apt-get update -y &&\
+    #$APT_INSTALL libssl-dev &&\
+    #wget https://github.com/Kitware/CMake/releases/download/v3.17.2/cmake-3.17.2.tar.gz  &&\
+    #tar -xzvf cmake-3.17.2.tar.gz &&\
+    #cd cmake-3.17.2 &&\
+    #./bootstrap &&\
+    #make &&\
+    #make install &&\
 
     $APT_INSTALL libboost-all-dev &&\
-    git clone https://github.com/traveller59/spconv.git --recursive &&\
-    cd spconv && git checkout 48b9a86 &&\
-    python setup.py bdist_wheel &&\
-    cd ./dist && pip install * &&\
 
     $APT_INSTALL libsm6 libxext6 libxrender-dev &&\
     $PIP_INSTALL \
-    opencv-python seaborn psutil nuscenes-devkit &&\
+    opencv-python seaborn psutil &&\
+    git clone https://github.com/traveller59/spconv.git --recursive &&\
+    cd spconv && git checkout c336139 &&\
+    python setup.py bdist_wheel &&\
+    cd ./dist && pip install * &&\
 
 # ==================================================================
 # config & cleanup
@@ -112,8 +118,8 @@ RUN cp -r ./boost_1_68_0/boost /usr/include
 RUN rm -rf ./boost_1_68_0
 RUN rm -rf ./boost_1_68_0.tar.gz
 RUN git clone https://github.com/traveller59/second.pytorch.git --depth 10
-RUN git clone https://github.com/traveller59/SparseConvNet.git --depth 10
-RUN cd ./SparseConvNet && python setup.py install && cd .. && rm -rf SparseConvNet
+#RUN git clone https://github.com/traveller59/SparseConvNet.git --depth 10
+#RUN cd ./SparseConvNet && python setup.py install && cd .. && rm -rf SparseConvNet
 ENV NUMBAPRO_CUDA_DRIVER=/usr/lib/x86_64-linux-gnu/libcuda.so
 ENV NUMBAPRO_NVVM=/usr/local/cuda/nvvm/lib64/libnvvm.so
 ENV NUMBAPRO_LIBDEVICE=/usr/local/cuda/nvvm/libdevice
