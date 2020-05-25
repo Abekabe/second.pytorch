@@ -52,18 +52,46 @@ RUN APT_INSTALL="apt-get install -y --no-install-recommends" && \
         numpy \
         scipy \
         matplotlib \
-        Cython \
-        && \
+        Cython &&\
 # ==================================================================
 # pytorch
 # ------------------------------------------------------------------
+#    $PIP_INSTALL \
+#        torch_nightly -f \
+#        https://download.pytorch.org/whl/nightly/cu90/torch_nightly.html \
+#        && \
+#    $PIP_INSTALL \
+#        torchvision_nightly \
+#        && \
+    wget -O torch-1.1.0-cp36-cp36m-linux_x86_64.whl \
+        https://download.pytorch.org/whl/cu90/torch-1.1.0-cp36-cp36m-linux_x86_64.whl &&\
+    wget -O torchvision-0.3.0-cp36-cp36m-manylinux1_x86_64.whl \
+        https://download.pytorch.org/whl/cu90/torchvision-0.3.0-cp36-cp36m-manylinux1_x86_64.whl &&\
     $PIP_INSTALL \
-        torch_nightly -f \
-        https://download.pytorch.org/whl/nightly/cu90/torch_nightly.html \
+        torch-1.1.0-cp36-cp36m-linux_x86_64.whl\
+        torchvision-0.3.0-cp36-cp36m-manylinux1_x86_64.whl\
         && \
+    
+    apt-get remove -y --purge --auto-remove cmake &&\
+    apt-get update -y &&\
+    $APT_INSTALL libssl-dev &&\
+    wget https://github.com/Kitware/CMake/releases/download/v3.17.2/cmake-3.17.2.tar.gz  &&\
+    tar -xzvf cmake-3.17.2.tar.gz &&\
+    cd cmake-3.17.2 &&\
+    ./bootstrap &&\
+    make &&\
+    make install &&\
+
+    $APT_INSTALL libboost-all-dev &&\
+    git clone https://github.com/traveller59/spconv.git --recursive &&\
+    cd spconv && git checkout 48b9a86 &&\
+    python setup.py bdist_wheel &&\
+    cd ./dist && pip install * &&\
+
+    $APT_INSTALL libsm6 libxext6 libxrender-dev &&\
     $PIP_INSTALL \
-        torchvision_nightly \
-        && \
+    opencv-python seaborn psutil nuscenes-devkit &&\
+
 # ==================================================================
 # config & cleanup
 # ------------------------------------------------------------------
